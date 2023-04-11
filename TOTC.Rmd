@@ -3,7 +3,7 @@ title: "A Tale of Two Cities"
 author: "Sean Leggett"
 date: "2023-04-11"
 always_allow_html: true
-output: github_document
+output: html_document
 ---
 
 Load some essential libraries.
