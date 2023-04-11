@@ -1,0 +1,701 @@
+---
+title: "A Tale of Two Cities"
+author: "Sean Leggett"
+date: "2023-04-11"
+always_allow_html: true
+output: github_document
+---
+
+Load some essential libraries.
+```{r}
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(readxl))
+suppressMessages(library(tinytex))
+suppressMessages(library(plotly))
+suppressMessages(library(lubridate))
+suppressMessages(library(htmltools))
+suppressMessages(library(DT))
+```
+
+## Revenues
+
+We took revenue data from the fabulous work released each year by Deloitte with their Deloitte Money Football League. We painstakingly pored over each year's leaderboard and compiled into Excel, which is presented here as CSV. We have no reason to doubt anything produced by Deloitte, however, we did do a couple of crosschecks against some filings with Companies House. We are content to rely on Deloitte's work and thank them for it.
+
+Although we are dealing with a review of Liverpool and Manchester City, all teams have been recorded in our csv file.
+
+Clicking on the link below will take you to the Deloitte Football Money League home and contains some excellent and informative reads over the years they have compiled this data.
+
+[Deloitte Football Money League](https://www2.deloitte.com/uk/en/pages/sports-business-group/articles/deloitte-football-money-league.html)
+
+Let's grab the data we prepared. The read.csv() function will create an R data frame for us with the contents of the csv file we specify. A data frame is an R object similar in structure to a traditional table.
+
+R uses the '<-' assignment operator. There are others but we will not complicate the conversation. Best practice typically recommends <- for assignment.
+
+```{r}
+Football.Revenues <- read.csv(file="footiedata/FootballRevenues.csv", header=TRUE, sep=",")
+## This creates an object (in this case a data.frame) named 'Football.Revenues' from the csv file.
+
+head(Football.Revenues, n=10)
+## We call the new object 'Football.Revenues to obtain a visualization and display only top 10.
+```
+
+```{r}
+## Calling str() 'structure' of an object displays information about the object and contents.
+str(Football.Revenues)
+## class() will show the type of object.
+class(Football.Revenues)
+```
+
+We will also be using custom palette for plots leveraging club colors. We are generating this global variable "footie_palette" to reference in all our plots.
+
+```{r}
+footie_palette <- c(rgb(200,16,46, maxColorValue = 255), rgb(108,171,221, maxColorValue = 255))
+footie_palette <- setNames(footie_palette, c("LFC", "MCFC"))
+```
+
+
+```{r}
+LabelTags <- c("Liverpool FC", "Manchester City")
+LabelTags <- setNames(LabelTags, c("LFC", "MCFC"))
+```
+
+We are going to visualize total revenues for Liverpool and Manchester City to get a feel for context and orders of magnitude. The goal is to filter the data.frame Football.Revenues to work with only LFC and MCFC data. The filter() function is a component of library(dplyr).
+
+```{r}
+LFCvMCFC.Revenues <- # assignment to an object.
+ filter(Football.Revenues, Identifier %in% 
+          c("LFC","MCFC"))
+# we like to use %in% but there are other methods.
+ 
+LFCvMCFC.Revenues
+
+```
+
+We can see that the list is now filtered the way we like. Let's summarize and plot a visual of total revenues over the period in question.
+
+```{r}
+Revenue.Totals <-
+  LFCvMCFC.Revenues %>% # we will discuss the "pipe" %>% below.
+  group_by(Club) %>%
+    summarize(Total = sum(Total))
+Revenue.Totals
+```
+A decent amount of money, then.
+
+```{r}
+Revenue.Pie <-
+  
+  plot_ly(
+    data = Revenue.Totals,
+    labels = ~Club,
+    values = ~Total,
+    type = 'pie',
+    marker = list(colors = footie_palette)) %>% #note piping '%>%' the plot to layout.
+  
+layout(title = 'Total Revenue LFC v MCFC - 2007/2008 to 2017/2018 (£ Millions)')
+
+Revenue.Pie
+
+```
+
+What's £200 Million between friends? So, from the 2007/2008 season up to the 2017/2018 season, Manchester City officially recorded a smidgeon under £3 Billion in revenues while Liverpool recroded £2.79 Billion. One would not think this to be an astronomical advantage. But let's see how the numbers look over time.
+
+```{r}
+
+Revenue.Plot <-
+  
+  plot_ly(
+    data = LFCvMCFC.Revenues,
+    x = ~Season,
+    y = ~Total,
+    type = "scatter",
+    mode = "lines",
+    color = ~Identifier,
+    colors = footie_palette) %>%
+  
+  layout(legend = list(x = 0.05, y = 0.95), #sometimes we move the legend around
+      title = "LFC & MCFC Annual Revenue",
+         yaxis = list(title = '(£ Millions)'))
+
+Revenue.Plot
+
+```
+This is an interesting graphic. Liverpool booked more revenue than Manchester City from the 2007/2008 season until 2010/2011 season. From 2011/2012 onwards, Manchester City has steadily outperformed Liverpool. Although, for 2017/2018 it appears Liverpool have shrunk the gap somewhat. Whether this becomes a future trend is impossible to say but worth watching. In any event, it is clear that over 11 seasons, the overall revenue for these two teams had a steep incline. No doubt this is a large reflection of the tv deals signed by the Premier League over the past decade.
+
+We do not expect to see a striking visualization but let's check and see how each compares on the three major categories of revenue.
+
+```{r}
+Stream.Summary <-
+  LFCvMCFC.Revenues %>%
+  group_by(Club)%>%
+  summarize(Matchday = sum(Matchday), Commercial = sum(Commercial), Broadcast = sum(Broadcast))
+
+
+Stream.Summary
+```
+
+```{r}
+Matchday.Plot <-
+  plot_ly(
+    data = LFCvMCFC.Revenues,
+    x = ~Season,
+    y = ~Matchday,
+    type = 'scatter',
+    mode = 'lines',
+    color = ~Identifier,
+    colors = footie_palette,
+    showlegend = FALSE
+  ) %>%
+  
+  layout(annotations = list(x = 0.2 , y = .95, text = "Matchday", showarrow = F, 
+xref='paper', yref='paper'))
+
+Broadcast.Plot <-
+  plot_ly(
+    data = LFCvMCFC.Revenues,
+    x = ~Season,
+    y = ~Broadcast,
+    type = 'scatter',
+    mode = 'lines',
+    color = ~Identifier,
+    colors = footie_palette,
+    showlegend = FALSE
+  ) %>%
+
+layout(annotations = list(x = 0.4 , y = .95, text = "Broadcast", showarrow = F, 
+xref='paper', yref='paper'))
+  
+Commercial.Plot <-
+  plot_ly(
+    data = LFCvMCFC.Revenues,
+    x = ~Season,
+    y = ~Commercial,
+    type = 'scatter',
+    mode = 'lines',
+    color = ~Identifier,
+    colors = footie_palette
+  ) %>%
+  
+  
+layout(annotations = list(x = 0.6 , y = .95, text = "Commercial", showarrow = F, 
+xref='paper', yref='paper'))
+
+Stream.Plot <- 
+  subplot(Matchday.Plot, Broadcast.Plot, Commercial.Plot, shareY = TRUE) %>%
+ 
+layout(title = "LFC & MCFC Revenue Categories",
+      yaxis = list(title = '(£ Millions)')
+)
+
+Stream.Plot
+
+```
+That certainly tells a story.
+
+1. Matchday revenue is less relied upon than broadcast or commercial. After some remodelling at Anfield, Liverpool has opened an advantage.
+2. Broadcast revenue has seen huge growth and jumps can be seen every 3 years as new broadcast contracts are negotiated. Both teams are relatively even here with some fluctuation based on Champions League participation and other factors.
+3. Commercial revenue is significantly disparate. The latest figures show Manchester City a whopping £84 Million ahead for 2017/2018. While Liverpool is also growing its commercial revenue, Manchester City have held this advantage for some time now.
+
+One might suspect the club receives generous arrangements from sister companies within the family. However, we will have to see if this sort of data is available for review.
+
+## Player Transfers
+
+Grabbing the data. The read_xlsx() function allows us to auto-generate an R data.frame directly from an existing MS Excel file. There are similar functions, available through R and packages, for other file types such as read.csv(). read_xlsx() is a function found within the library(readxl).
+
+```{r}
+LFCvMCFC <- read_xlsx("footiedata/LFCVMCFC.xlsx")
+```
+
+The data enclosed was produced using information on transferleague.co.uk, transfermarkt.com/.co.uk, wikipedia and club/fan sites to help clarify some questions.
+
+In most cases, transfer amounts are as listed on transferleague.co.uk and player attributes primarily sourced on transfermarkt. Some notes:
+
+1) Alex Manninger was removed from the data.
+2) Danny Ings transfer value set at tribunal April 2016.
+3) Removed Lawrence Vigouroux transaction between U20 sides.
+4) Fábio Aurélio re-signed with Liverpool in August 2010. This transaction was removed and not considered to be a transfer.
+5) Rabbi Matonda transaction removed. Research shows only sale to Schalke and no evidence of large fee transaction incoming for MCFC.
+
+A quick look at the summary data:
+
+```{r}
+#display summary
+summary(LFCvMCFC)
+```
+
+Quick points of interest are median transfer fee at £8.25 Million, median age at time of transfer 24.29 years.
+
+We intend to plot against calendar years primarily and add a column "Year" using lubridate year() function:
+```{r}
+#add column to df extracting year from "Date"
+LFCvMCFC$Year <-
+year(LFCvMCFC$Date)
+
+#display structure
+str(LFCvMCFC)
+```
+
+How much money did both teams spend on transfers from mid 2008 to 2019?
+
+```{r}
+SpendSummary <-
+  
+  LFCvMCFC %>%
+  group_by(Club) %>%
+  summarise(TotalFees = sum(Fee))
+
+SpendSummary
+```
+
+Yeah, quite a lot.
+
+```{r}
+TotalPie <-
+  
+  plot_ly(
+    data = SpendSummary,
+    labels = ~Club,
+    values = ~TotalFees,
+    type = 'pie',
+    marker = list(colors = footie_palette)) %>% #note piping '%>%' the plot to layout.
+  
+layout(title = 'Total Transfer Spend LFC v MCFC - 2008 to 2019 (£ Millions)')
+
+TotalPie
+
+```
+
+Of all the fees that LFC and MCFC spent from 2008 to 2019, Liverpool accounted for 39% and MCFC accounted for 61%. Or put another way, MCFC spent half as much again as LFC...
+
+```{r}
+(1391.05-900.95)/900.95 * 100
+```
+
+Intuitively, fans will probably have expected amounts in this order of magnitude.
+
+Let's see how that spending played out year over year...
+
+```{r}
+AnnualSpending <-
+  LFCvMCFC %>%
+  group_by(Year, Club) %>%
+  summarise(AnnualSpend = sum(Fee))
+  
+AnnualSpending
+```
+
+```{r}
+AnnualPlot <-
+  
+  plot_ly(
+    data = AnnualSpending,
+    x = ~Year,
+    y = ~AnnualSpend,
+    type = "scatter",
+    mode = "line",
+    color = ~Club,
+    colors = footie_palette) %>%
+  
+  layout(legend = list(x = 0.05, y = 0.95), #sometimes we move the legend around
+      title = "LFC & MCFC Annual Transfer Spending",
+         yaxis = list(title = 'Spent (£ Millions)'))
+
+AnnualPlot
+
+```
+
+It would appear Manchester City took full advantage of new investment in 2008, 2009 and 2010. This pattern also resumed in 2015, 2016 and 2017 where significant investment was made. Liverpool spent more on transfers than Manchester City during only three years; 2011, 2014 and 2018.
+
+Let's see what patterns might emerge from a look at the individual transactions.
+
+```{r}
+TransactionScatter <- 
+ 
+   plot_ly(
+    data = LFCvMCFC,
+    x = ~Year,
+    y = ~Fee,
+    type = "scatter",
+    mode = 'markers',
+    color = ~Club,
+    colors = footie_palette,
+    size = 10, #we have opted for a standard size here
+    marker = list(opacity = 0.75), #we have a lot of density in parts so opacity is increased
+    text = ~paste(Player_Purchased, Fee, Club), #text and hoverinfo introduced to improve default hovertext
+    hoverinfo = "text") %>%
+
+layout(legend = list(x = 0.06, y = 1.0),
+       title = "LFC & MCFC Individual Transfers",
+       yaxis = list(title = 'Cost (£ Millions)'))
+
+TransactionScatter
+
+```
+
+Interestingly, we can see LFC has the highest amount paid for a single player (Virgil van Dijk in 2018) but in all other years, MCFC purchased the most expensive player; in many years, several more expensive players than LFC.
+
+Let's have a look at distribution of purchase transactions:
+
+```{r}
+PriceViola <- LFCvMCFC %>%
+  
+  plot_ly(
+    x = ~Club,
+    y = ~Fee,
+    split = ~Club,
+    type = 'violin',
+    colors = footie_palette,
+    color = ~Club,
+    box = list(visible = T),
+    meanline = list(visible = T)) %>% 
+  
+  layout(title = "LFC & MCFC Fee Distribution of Transfer Targets",
+    xaxis = list(title = "Club"),
+        yaxis = list(title = "Fee (£ Millions)",
+      zeroline = F)
+  )
+
+PriceViola
+
+```
+
+We like this visual. You can see that Liverpool's distribution of player purchase values skews lower than Manchester City. Liverpool median = £7 Million and Manchester City £12 Million. The LFC mean = £11.5 Million and MCFC mean = £16.1 Million. Liverpool KDE of 1 collides at £3.27 Million vs £4.27 Million for Manchester City. LFC 3rd quartile is £17 Million and Manchester City at £25.5 Milion. If one assumes a correlation of quality to cost, this visualization would suggest a deeper distribution of quality in the Manchester City side.
+
+We were curious how these massive financial resources had be allocated to positions on the pitch, also...
+
+```{r}
+PositionSummary <-
+  
+ LFCvMCFC %>%
+  group_by(Position, Club) %>%
+    summarise(Total= sum(Fee))
+
+PositionSummary
+```
+
+Visual will make this more meaningful...
+
+```{r}
+PositionScatter <- 
+  
+  plot_ly(
+    data = PositionSummary,
+    x = ~Total,
+    y = ~Position,
+    type = "scatter",
+    mode = 'markers',
+    color = ~Club,
+    colors = footie_palette,
+    size = 10) %>%
+      
+layout(title = "LFC & MCFC Transfer Spend by Position",
+       xaxis = list(title = 'Total (£ Millions)'))
+
+PositionScatter
+
+```
+
+We are not surprised that most financial resources have been allocated to the spine of the team in Centre Back, Centre Midfield and Centre Forward. This is true of both teams although MCFC have deployed significantly more. Interesting outlier at Right Wing where MCFC have deployed susbstantial resources.
+
+What stories emerge when looking at teams that players were purchased "From"?
+
+```{r}
+PartnerSummary <-
+  LFCvMCFC %>%
+  group_by(Club, From) %>%
+  summarise(Total = sum(Fee))
+
+PartnerSummary
+
+PartnerScatter <- 
+  
+  plot_ly(
+   data = PartnerSummary,
+   x = ~Total,
+   y = ~From,
+   type = "scatter",
+   mode = 'markers',
+   color = ~Club,
+   colors = footie_palette,
+   marker = list(size = ~Total/4)) %>% #we have changed scaling here to drag the eye in desired direction
+     
+layout(title = "LFC & MCFC Transfer Spending by Selling Club",
+       xaxis = list(title = "Spending (£ Millions)")
+   )
+
+PartnerScatter
+```
+
+Liverpool really have spent a lot of money at Southampton and AS Roma. However, this plot is super high on density and low on readability. Do we need to see all the dots around y axis? Probably not. Let's do a top 10 leveraging top_n() function.
+
+```{r}
+TopPartnerSummary <-
+  top_n(PartnerSummary, 10, Total)
+
+TopPartnerSummary
+
+TopPartnerScatter <- 
+  
+  plot_ly(
+    data = TopPartnerSummary,
+    x = ~Total,
+    y = ~From,
+    type = "scatter",
+    mode = 'markers',
+    color = ~Club,
+    colors = footie_palette,
+    marker = list(size = ~Total/4)) %>%
+  
+  layout(title = "LFC & MCFC Top 10 Transfer Partners",
+         xaxis = list(title = "Spending (£ Millions)")
+)
+TopPartnerScatter
+```
+
+LFC and MCFC clearly had their preferred partners during the period in question. MCFC more evenly distributed across Monaco, Everton, Wolfsburg and Arsenal. We wonder if this pattern holds true when looking at the League players have come from. top_n() will be used here again.
+
+```{r}
+LeagueSummary <-
+  LFCvMCFC %>%
+  group_by(Club, League) %>%
+  summarise(Total = sum(Fee))
+
+TopLeagueSummary <-
+  top_n(LeagueSummary, 10, Total)
+
+TopLeagueScatter <- 
+  
+  plot_ly(
+    data = TopLeagueSummary,
+    x = ~Total,
+    y = ~League,
+    type = "scatter",
+    mode = 'markers',
+    color = ~Club,
+    colors = footie_palette,
+    
+    marker = list(size = ~Total/5)) %>%
+          
+layout(title = "LFC & MCFC Transfer Purchases by Top 10 League of Origin",
+       xaxis = list(title = "Spending (£ Millions)")
+)
+
+TopLeagueScatter
+```
+
+Clearly, both teams have a preference for players already in the Premier League. Manchester City have shown a significant appetite for high value players from Spain's La Liga and to a lesser extent Germany's Bundesliga. Liverpool have also spent a good deal on Italy's Serie A, which is no surprise as we earlier saw the value of transactions with AS Roma. We are going to sidetrack for a moment as a question just occurred to us. Did the arrival of Pep Guardiola as manager of Manchester City influence spending on players from La Liga and Bundesliga? Guardiola managed in both these leagues prior to joining Manchester City.
+
+```{r}
+#Filter dataset
+PepSpending <-
+  LFCvMCFC %>%
+  filter(Club == "MCFC" & League %in% c("La Liga", "Bundesliga", "Premier League"))
+
+#Summarize the data
+  PepSpendingSummary <-
+    PepSpending %>%
+    group_by(Year, League) %>%
+    summarise(Total = sum(Fee))
+          
+PepSpendingSummary
+
+```
+
+And let's visualize this with Premier League for reference:
+
+```{r}
+PepSpendingPlot <-
+  
+  plot_ly(
+    data = PepSpendingSummary,
+    x = ~Year,
+    y = ~Total,
+    type = "scatter",
+    mode = "line",
+    color = ~League) %>%
+
+layout(title = "MCFC Spending on Bundesliga and La Liga",
+       yaxis = list(title = "Spending (£ Millions)")
+       )
+PepSpendingPlot
+```
+
+Pep Guardiola arrived February 1, 2016. There is clearly an uptick for spending on players from La Liga but peaks also exist in 2010 and 2013. Pep's knowledge of the league may have influenced some of the recent purchases.
+
+Fans may be curious about distribution of purchases across country of origin. This is what we found. Again, we have refined based on a top 10.
+
+```{r}
+NationSummary <-
+  LFCvMCFC %>%
+  group_by(Club, International) %>%
+  summarise(Total = sum(Fee))
+
+TopNationSummary <-
+  top_n(NationSummary, 10, Total)
+
+TopNationScatter <- 
+  
+  plot_ly(
+  data = TopNationSummary,
+  x = ~Total, y = ~International,
+  type = "scatter",
+  mode = 'markers',
+  color = ~Club,
+  colors = footie_palette,
+  marker = list(size = ~Total/3)) %>%
+  
+  layout(title = "LFC & MCFC Transfer Spending by Top 10 Country of Origin",
+         xaxis = list(title = "Spending (£ Millions)",
+         yaxis = list(title = "Country")
+         )
+)
+
+TopNationScatter
+```
+
+In terms of monetary value, both clubs have spent the most on English players. MCFC have also invested large sums in French and Brazilian players. The absolute numbers are certainly telling but how are they trending? We will examine the top 6 nationalities represented above.
+
+```{r}
+#filter the data
+LFCFliter <-
+  LFCvMCFC %>%
+  filter(Club == "LFC" & International %in% c("England", "Brazil", "France", "Argentina", "Netherlands", "Spain"))
+ 
+#summarize
+LFCNationTrendSummary <-
+  LFCFliter %>%
+  group_by(Year, International) %>%
+  summarise(Total = sum(Fee))
+
+LFCNationTrendPlot <- 
+  plot_ly(
+    
+    data = LFCNationTrendSummary,
+          
+          x = ~Year, y = ~Total,
+          
+          type = "scatter",
+          mode = 'line',
+          linetype = ~International
+          
+          )
+
+LFCNationTrendPlot
+```
+
+For Liverpool we can see the early impact of spending on English players which also shows a recent slow increase. Large jump in resources deployed on Brazilian and Dutch players. Spending on the Dutch is due to the record on Virgil van Diyk.
+
+and MCFC?
+
+```{r}
+#filter the data
+MCFCFliter <-
+  LFCvMCFC %>%
+  filter(Club == "MCFC" & International %in% c("England", "Brazil", "France", "Argentina", "Netherlands", "Spain"))
+ 
+#summarize
+MCFCNationTrendSummary <-
+  MCFCFliter %>%
+  group_by(Year, International) %>%
+  summarise(Total = sum(Fee))
+
+MCFCNationTrendPlot <- 
+  plot_ly(
+    
+    data = MCFCNationTrendSummary,
+          
+          x = ~Year, y = ~Total,
+          
+          type = "scatter",
+          mode = 'line',
+    linetype = ~International
+              )
+
+MCFCNationTrendPlot
+```
+
+We are curious about the ages of players being purchased. Are they younger or established? Is one team buying younger than the other and investing for a longer future? We will use some slightly more involved statistical investigation here, opting for a violin plot. Please google them if you need detailed understanding.
+
+```{r}
+AgeViola <- LFCvMCFC %>%
+  
+  plot_ly(
+    x = ~Club,
+    y = ~Age_at_Transfer,
+    split = ~Club,
+    type = 'violin',
+    colors = footie_palette,
+    color = ~Club,
+    box = list(visible = T),
+    meanline = list(visible = T)) %>% 
+  
+  layout(title = "LFC & MCFC Age Distribution of Transfer Targets",
+    xaxis = list(title = "Club"),
+        yaxis = list(title = "Age at Transfer",
+      zeroline = F)
+  )
+
+AgeViola
+
+```
+
+It is down to the individual reader to make any inferences here in terms of club policy. However, LFC does demonstrate a mean age of transfer targets almost a full year younger than MCFC. This is also true of the q3 values and slightly less true of q1. The difference is reduced somewhat looking at median. KDE of 1 occurs for LFC at ~25 years of age and for MCFC at ~24.80. Again, readers can reach their own conclusions but we find this interesting and would be of even greater interest if combined with data regarding contract length, etc.
+
+We feel like trying a subplot of Country and League of Origin...
+
+```{r}
+TopLeagueScatterSub <- 
+  
+  plot_ly(
+    data = TopLeagueSummary,
+    x = ~Total,
+    y = ~League,
+    type = "scatter",
+    mode = 'markers',
+    color = ~Club,
+    colors = footie_palette,
+    marker = list(size = ~Total/5),
+    showlegend = FALSE) %>%
+          
+layout(xaxis = list(title = "Spending (£ Millions)")
+)
+
+TopNationScatterSub <- 
+  
+  plot_ly(
+  data = TopNationSummary,
+  x = ~Total, y = ~International,
+  type = "scatter",
+  mode = 'markers',
+  color = ~Club,
+  colors = footie_palette,
+  marker = list(size = ~Total/4)) %>%
+  
+  layout(xaxis = list(title = "Spending (£ Millions)")
+)
+
+NationAndLeagueSub <-
+  
+subplot(TopLeagueScatterSub, TopNationScatterSub, shareX = TRUE, margin = 0.1) %>%
+  
+  layout(title = "LFC & MCFC Transfer Spending by Nationality and League of Origin")
+
+NationAndLeagueSub
+
+
+```
+
+Generating HTML datatables:
+
+```{r}
+RevTable <- datatable(Football.Revenues, caption = "Deloitte Football Money League Rankings (all revenues in £ Millions)")
+
+RevTable
+```
+
+```{r}
+PurchaseTable <- datatable(LFCvMCFC, caption = "Player Purchase Transactions (Fee £ Millions")
+
+PurchaseTable
+```
