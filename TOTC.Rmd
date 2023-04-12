@@ -1,12 +1,16 @@
 ---
 title: "A Tale of Two Cities"
+knit: (function(input_file, encoding) {
+    out_dir <- 'docs';
+    rmarkdown::render(input_file,
+      encoding=encoding,
+      output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 author: "Sean Leggett"
 date: "2023-04-11"
-always_allow_html: true
 output: html_document
 ---
 
-Load some essential libraries.
+Load some fun and essential libraries.
 ```{r}
 suppressMessages(library(dplyr))
 suppressMessages(library(tidyr))
