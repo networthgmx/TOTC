@@ -1,0 +1,12 @@
+name: "TOTC"
+output_dir: "docs"
+navbar:
+  title: "Tale of Two Cities"
+  left:
+  - text: "Home"
+    href: index.html
+  - text: "R Exploration"
+    href: TOTC.html
+output:
+  html_document:
+    theme: cosmo
