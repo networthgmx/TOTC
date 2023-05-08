@@ -9,4 +9,4 @@ navbar:
     href: TOTC.html
 output:
   html_document:
-    theme: cosmo
+    theme: Cayman

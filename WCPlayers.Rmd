@@ -1,0 +1,906 @@
+---
+title: "World Cup Players"
+output: 
+  flexdashboard::flex_dashboard:
+    self_contained: false
+    theme: spacelab
+---
+
+
+Summary {data-orientation=rows}
+=========================================
+Row {data-height=300}
+-------------------------------------
+
+```{r, echo=FALSE}
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(readxl))
+suppressMessages(library(tinytex))
+suppressMessages(library(plotly))
+suppressMessages(library(lubridate))
+suppressMessages(library(htmltools))
+suppressMessages(library(flexdashboard))
+suppressMessages(library(DT))
+suppressMessages(library(scales))
+
+WCwinners <- read_excel("footiedata/WC_Winners.xlsx", col_types = "guess")
+
+Domestics <- WCwinners %>% filter(Domestic == "Yes")
+NonDomestics <- WCwinners %>% filter(Domestic == "No")
+WinDomestics <- WCwinners %>% filter(Finished == 1 & Domestic == "Yes")
+LoseDomestics <- WCwinners %>% filter(Finished ==2 & Domestic == "No")
+StarterDomestic <- WCwinners %>% filter(Starter == "Starter" & Domestic == "Yes")
+SubDomestic <- WCwinners %>% filter(Starter == "Sub" & Domestic == "Yes")
+WinStartDomestic <- WCwinners %>% filter(Finished ==1, Starter == "Starter", Domestic == "Yes")
+
+TotalPlayers <- nrow(WCwinners)
+TotalDomestics <- nrow(Domestics)
+TotalWinDomestic <- nrow(WinDomestics)
+TotalStartDomestic <- nrow(StarterDomestic)
+TotalWinStartDomestics <- nrow(WinStartDomestic)
+
+TotalDomesticPercent <- percent(TotalDomestics/TotalPlayers)
+TotalWinDomesticPercent <- percent(TotalWinDomestic/TotalPlayers)
+TotalStarterDomesticPercent <- percent(TotalStartDomestic/TotalPlayers)
+TotalWinStartDomesticsPercent <- percent(TotalWinStartDomestics/TotalPlayers)
+
+```
+
+### WC Final Players from Home League
+
+```{r}
+gauge(TotalDomesticPercent, min = 0, max = 100, symbol = '%')
+```
+
+### WC Final Starters from Home League
+
+```{r}
+gauge(TotalStarterDomesticPercent, min = 0, max = 100, symbol = '%')
+```
+
+### WC Final Winners from Home League
+
+```{r}
+gauge(TotalWinDomesticPercent, min = 0, max = 100, symbol = '%')
+```
+
+### WC Final Winners Starting and from Home League
+
+```{r}
+gauge(TotalWinStartDomesticsPercent, min = 0, max = 100, symbol = '%')
+```
+
+
+Row {data-height=700}
+-------------------------------------
+### Domestic League Representation at WC Final
+
+```{r, echo=FALSE}
+Bardata <-
+  WCwinners%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+
+LeagueBar <-
+  
+  plot_ly(
+    data = Bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+LeagueBar
+```
+
+USA 1994
+=========================================
+Column {data-width=500}
+-------------------------------------
+WINNER BRAZIL
+
+```{r}
+TeamFilter <- function(x,y){
+    n <-
+      filter(WCwinners, Country == x, Year == y)
+}
+```
+
+```{r}
+Brazil94 <-
+  TeamFilter('Brazil', 1994)
+```
+
+
+```{r}
+Brazil94Total <- nrow(Brazil94)
+Brazil94TotalDomestics <- Brazil94 %>% filter(Domestic == "Yes")
+Brazil94StartDomestics <- Brazil94 %>% filter(Domestic == "Yes", Starter == "Starter")
+Brazil94percentDomestics <- percent(nrow(Brazil94TotalDomestics)/nrow(Brazil94))
+Brazil94percentStartDomestics <- percent(nrow(Brazil94StartDomestics)/11)
+```
+
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Brazil94percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Brazil94percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Brazil 1994 Players Club Leagues
+
+```{r}
+Brazil94bardata <-
+  Brazil94%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Brazil94bar <-
+  
+  plot_ly(
+    data = Brazil94bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Brazil94bar
+```
+
+Column {data-width=500}
+-------------------------------------
+
+LOSER ITALY
+
+```{r}
+Italy94 <-
+  TeamFilter('Italy', 1994)
+```
+
+```{r}
+Italy94Total <- nrow(Italy94)
+Italy94TotalDomestics <- Italy94 %>% filter(Domestic == "Yes")
+Italy94StartDomestics <- Italy94 %>% filter(Domestic == "Yes", Starter == "Starter")
+Italy94percentDomestics <- percent(nrow(Italy94TotalDomestics)/nrow(Italy94))
+Italy94percentStartDomestics <- percent(nrow(Italy94StartDomestics)/11)
+```
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Italy94percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Italy94percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Italy 1994 Players Club Leagues
+
+```{r}
+Italy94bardata <-
+  Italy94%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Italy94bar <-
+  
+  plot_ly(
+    data = Italy94bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Italy94bar
+```
+
+FRANCE 1998
+=========================================
+Column {data-width=500}
+-------------------------------------
+WINNER FRANCE
+
+```{r}
+TeamFilter <- function(x,y){
+    n <-
+      filter(WCwinners, Country == x, Year == y)
+}
+```
+
+```{r}
+France98 <-
+  TeamFilter('France', 1998)
+```
+
+
+```{r}
+France98Total <- nrow(Brazil94)
+France98TotalDomestics <- France98 %>% filter(Domestic == "Yes")
+France98StartDomestics <- France98 %>% filter(Domestic == "Yes", Starter == "Starter")
+France98percentDomestics <- percent(nrow(France98TotalDomestics)/nrow(France98))
+France98percentStartDomestics <- percent(nrow(France98StartDomestics)/11)
+```
+
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(France98percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(France98percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### France 1998 Players Club Leagues
+
+```{r}
+France98bardata <-
+  France98%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+France98bar <-
+  
+  plot_ly(
+    data = France98bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+France98bar
+```
+
+Column {data-width=500}
+-------------------------------------
+
+LOSER BRAZIL
+
+```{r}
+Brazil98 <-
+  TeamFilter('Brazil', 1998)
+```
+
+```{r}
+Brazil98Total <- nrow(Brazil98)
+Brazil98TotalDomestics <- Brazil98 %>% filter(Domestic == "Yes")
+Brazil98StartDomestics <- Brazil98 %>% filter(Domestic == "Yes", Starter == "Starter")
+Brazil98percentDomestics <- percent(nrow(Brazil98TotalDomestics)/nrow(Brazil98))
+Brazil98percentStartDomestics <- percent(nrow(Brazil98StartDomestics)/11)
+```
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Brazil98percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Brazil98percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Brazil 1998 Players Club Leagues
+
+```{r}
+Brazil98bardata <-
+  Brazil98%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Brazil98bar <-
+  
+  plot_ly(
+    data = Brazil98bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Brazil98bar
+```
+
+JAPAN & KOREA 2002
+=========================================
+Column {data-width=500}
+-------------------------------------
+WINNER BRAZIL
+
+```{r}
+TeamFilter <- function(x,y){
+    n <-
+      filter(WCwinners, Country == x, Year == y)
+}
+```
+
+```{r}
+Brazil02 <-
+  TeamFilter('Brazil', 2002)
+```
+
+
+```{r}
+Brazil02Total <- nrow(Brazil02)
+Brazil02TotalDomestics <- Brazil02 %>% filter(Domestic == "Yes")
+Brazil02StartDomestics <- Brazil02 %>% filter(Domestic == "Yes", Starter == "Starter")
+Brazil02percentDomestics <- percent(nrow(Brazil02TotalDomestics)/nrow(Brazil02))
+Brazil02percentStartDomestics <- percent(nrow(Brazil02StartDomestics)/11)
+```
+
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Brazil02percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Brazil02percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Brazil 2002 Players Club Leagues
+
+```{r}
+Brazil02bardata <-
+  Brazil02%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Brazil02bar <-
+  
+  plot_ly(
+    data = Brazil02bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Brazil02bar
+```
+
+Column {data-width=500}
+-------------------------------------
+
+LOSER GERMANY
+
+```{r}
+Germany02 <-
+  TeamFilter('Germany', 2002)
+```
+
+```{r}
+Germany02Total <- nrow(Germany02)
+Germany02TotalDomestics <- Germany02 %>% filter(Domestic == "Yes")
+Germany02StartDomestics <- Germany02 %>% filter(Domestic == "Yes", Starter == "Starter")
+Germany02percentDomestics <- percent(nrow(Germany02TotalDomestics)/nrow(Germany02))
+Germany02percentStartDomestics <- percent(nrow(Germany02StartDomestics)/11)
+```
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Germany02percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Germany02percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Germany 2002 Players Club Leagues
+
+```{r}
+Germany02bardata <-
+  Germany02%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Germany02bar <-
+  
+  plot_ly(
+    data = Germany02bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Germany02bar
+```
+
+GERMANY 2006
+=========================================
+Column {data-width=500}
+-------------------------------------
+WINNER ITALY
+
+```{r}
+Italy06 <-
+  TeamFilter('Italy', 2006)
+```
+
+
+```{r}
+Italy06Total <- nrow(Italy06)
+Italy06TotalDomestics <- Italy06 %>% filter(Domestic == "Yes")
+Italy06StartDomestics <- Italy06 %>% filter(Domestic == "Yes", Starter == "Starter")
+Italy06percentDomestics <- percent(nrow(Italy06TotalDomestics)/nrow(Italy06))
+Italy06percentStartDomestics <- percent(nrow(Italy06StartDomestics)/11)
+```
+
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Italy06percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Italy06percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Italy 2006 Players Club Leagues
+
+```{r}
+Italy06bardata <-
+  Italy06%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Italy06bar <-
+  
+  plot_ly(
+    data = Italy06bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Italy06bar
+```
+
+Column {data-width=500}
+-------------------------------------
+
+LOSER FRANCE
+
+```{r}
+France06 <-
+  TeamFilter('France', 2006)
+```
+
+```{r}
+France06Total <- nrow(France06)
+France06TotalDomestics <- France06 %>% filter(Domestic == "Yes")
+France06StartDomestics <- France06 %>% filter(Domestic == "Yes", Starter == "Starter")
+France06percentDomestics <- percent(nrow(France06TotalDomestics)/nrow(France06))
+France06percentStartDomestics <- percent(nrow(France06StartDomestics)/11)
+```
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(France06percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(France06percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### France 2006 Players Club Leagues
+
+```{r}
+France06bardata <-
+  France06%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+France06bar <-
+  
+  plot_ly(
+    data = France06bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+France06bar
+```
+
+SOUTH AFRICA 2010
+=========================================
+Column {data-width=500}
+-------------------------------------
+WINNER SPAIN
+
+```{r}
+Spain10 <-
+  TeamFilter('Spain', 2010)
+```
+
+
+```{r}
+Spain10Total <- nrow(Spain10)
+Spain10TotalDomestics <- Spain10 %>% filter(Domestic == "Yes")
+Spain10StartDomestics <- Spain10 %>% filter(Domestic == "Yes", Starter == "Starter")
+Spain10percentDomestics <- percent(nrow(Spain10TotalDomestics)/nrow(Spain10))
+Spain10percentStartDomestics <- percent(nrow(Spain10StartDomestics)/11)
+```
+
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Spain10percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Spain10percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Spain 2010 Players Club Leagues
+
+```{r}
+Spain10bardata <-
+  Spain10%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Spain10bar <-
+  
+  plot_ly(
+    data = Spain10bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Spain10bar
+```
+
+Column {data-width=500}
+-------------------------------------
+
+LOSER NETHERLANDS
+
+```{r}
+Netherlands10 <-
+  TeamFilter('Netherlands', 2010)
+```
+
+```{r}
+Netherlands10Total <- nrow(Netherlands10)
+Netherlands10TotalDomestics <- Netherlands10 %>% filter(Domestic == "Yes")
+Netherlands10StartDomestics <- Netherlands10 %>% filter(Domestic == "Yes", Starter == "Starter")
+Netherlands10percentDomestics <- percent(nrow(Netherlands10TotalDomestics)/nrow(Netherlands10))
+Netherlands10percentStartDomestics <- percent(nrow(Netherlands10StartDomestics)/11)
+```
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Netherlands10percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Netherlands10percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Netherlands 2010 Players Club Leagues
+
+```{r}
+Netherlands10bardata <-
+  Netherlands10%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Netherlands10bar <-
+  
+  plot_ly(
+    data = Netherlands10bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Netherlands10bar
+```
+
+BRAZIL 2014
+=========================================
+Column {data-width=500}
+-------------------------------------
+WINNER GERMANY
+
+```{r}
+Germany14 <-
+  TeamFilter('Germany', 2014)
+```
+
+
+```{r}
+Germany14Total <- nrow(Germany14)
+Germany14TotalDomestics <- Germany14 %>% filter(Domestic == "Yes")
+Germany14StartDomestics <- Germany14 %>% filter(Domestic == "Yes", Starter == "Starter")
+Germany14percentDomestics <- percent(nrow(Germany14TotalDomestics)/nrow(Germany14))
+Germany14percentStartDomestics <- percent(nrow(Germany14StartDomestics)/11)
+```
+
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Germany14percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Germany14percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Germany 2014 Players Club Leagues
+
+```{r}
+Germany14bardata <-
+  Germany14%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Germany14bar <-
+  
+  plot_ly(
+    data = Germany14bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Germany14bar
+```
+
+Column {data-width=500}
+-------------------------------------
+
+LOSER ARGENTINA
+
+```{r}
+Argentina14 <-
+  TeamFilter('Argentina', 2014)
+```
+
+```{r}
+Argentina14Total <- nrow(Argentina14)
+Argentina14TotalDomestics <- Argentina14 %>% filter(Domestic == "Yes")
+Argentina14StartDomestics <- Argentina14 %>% filter(Domestic == "Yes", Starter == "Starter")
+Argentina14percentDomestics <- percent(nrow(Argentina14TotalDomestics)/nrow(Argentina14))
+Argentina14percentStartDomestics <- percent(nrow(Argentina14StartDomestics)/11)
+```
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Argentina14percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Argentina14percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Argentina 2014 Players Club Leagues
+
+```{r}
+Argentina14bardata <-
+  Argentina14%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Argentina14bar <-
+  
+  plot_ly(
+    data = Argentina14bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Argentina14bar
+```
+
+RUSSIA 2018
+=========================================
+Column {data-width=500}
+-------------------------------------
+WINNER FRANCE
+
+```{r}
+France18 <-
+  TeamFilter('France', 2018)
+```
+
+
+```{r}
+France18Total <- nrow(France18)
+France18TotalDomestics <- France18 %>% filter(Domestic == "Yes")
+France18StartDomestics <- France18 %>% filter(Domestic == "Yes", Starter == "Starter")
+France18percentDomestics <- percent(nrow(France18TotalDomestics)/nrow(France18))
+France18percentStartDomestics <- percent(nrow(France18StartDomestics)/11)
+```
+
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(France18percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(France18percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### France 2018 Players Club Leagues
+
+```{r}
+France18bardata <-
+  France18%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+France18bar <-
+  
+  plot_ly(
+    data = France18bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+France18bar
+```
+
+Column {data-width=500}
+-------------------------------------
+
+LOSER CROATIA
+
+```{r}
+Croatia18 <-
+  TeamFilter('Croatia', 2018)
+```
+
+```{r}
+Croatia18Total <- nrow(Croatia18)
+Croatia18TotalDomestics <- Croatia18 %>% filter(Domestic == "Yes")
+Croatia18StartDomestics <- Croatia18 %>% filter(Domestic == "Yes", Starter == "Starter")
+Croatia18percentDomestics <- percent(nrow(Croatia18TotalDomestics)/nrow(Croatia18))
+Croatia18percentStartDomestics <- percent(nrow(Croatia18StartDomestics)/11)
+```
+
+### Percent of Total Players from Home League
+
+```{r}
+gauge(Croatia18percentDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Percent of Starters from Home League
+
+```{r}
+gauge(Croatia18percentStartDomestics, min = 0, max = 100, symbol = '%')
+```
+
+### Croatia 2018 Players Club Leagues
+
+```{r}
+Croatia18bardata <-
+  Argentina14%>%
+  group_by(Club_League, Starter)%>%
+  summarise(Total = sum(Count))
+
+Croatia18bar <-
+  
+  plot_ly(
+    data = Croatia18bardata,
+    x = ~Club_League,
+    y = ~Total,
+    type = 'bar',
+    color = ~Starter
+  )%>%
+
+  layout(barmode = 'stack')
+
+
+Croatia18bar
+```
+
+DATA
+=========================================
+
+```{r}
+datatable(WCwinners)
+```
+
