@@ -7,8 +7,6 @@ navbar:
     href: index.html
   - text: "R Exploration"
     href: TOTC.html
-  - text: "World Cup"
-    href: WCPlayers.html
 output:
   html_document:
       theme: cosmo
