@@ -8,5 +8,6 @@ navbar:
   - text: "R Exploration"
     href: TOTC.html
 output:
-  html_document:
-    theme: Cayman
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
