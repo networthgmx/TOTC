@@ -7,6 +7,8 @@ navbar:
     href: index.html
   - text: "R Exploration"
     href: TOTC.html
+  - text: "World Cup"
+    href: WCPlayers.html
 output:
   prettydoc::html_pretty:
     theme: cayman
