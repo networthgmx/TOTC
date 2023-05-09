@@ -2,10 +2,6 @@
 title: "A Tale of Two Cities"
 author: "Sean Leggett"
 date: "2023-04-11"
-output:
-  prettydoc::html_pretty:
-    theme: cayman
-    highlight: github
 ---
 
 Load some fun and essential libraries.

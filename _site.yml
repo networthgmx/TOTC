@@ -10,6 +10,5 @@ navbar:
   - text: "World Cup"
     href: WCPlayers.html
 output:
-  prettydoc::html_pretty:
-    theme: cayman
-    highlight: github
+  html_document:
+      theme: cosmo
