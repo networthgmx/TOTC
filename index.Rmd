@@ -6,7 +6,7 @@ date: "2023-04-27"
 
 Welcome, to A Tale Of Two Cities. The red half of Liverpool and the blue half of Manchester. Apologies to Manchester United.
 
-#Introduction
+# Introduction
 A couple of years ago, this information was collected and reviewed to answer two burning questions:
 
 1. What was the financial impact of Manchester City being acquired by the sovereign wealth fund of Abu Dhabi?
@@ -22,7 +22,7 @@ Liverpool and Manchester City data is from the 2007/2008 Premier League season u
 
 We hope you enjoy.
 
-#Findings
+# Findings
 It will come as no surprise that there was a significant impact to Manchester City after Abu Dhabi United Group's takeover. Revenues in particular changed drastically. Some of this can be expected simply by regular participation in the Champions League with it's added game days and substantial television revenues. However, the largest change in revenues came from the "commercial" stream. By the 2010/2011 season Manchester City commercial revenue matched Liverpool's and thereafter outstripped Liverpool by significant margins. By the end of our analysis period Manchester City booked commercial revenue of 235.4 Million pounds to Liverpool's 151.3 Million pounds. Given the histories of the two teams this is somewhat surprising and could possibly be explained by other companies in the Abu Dhabi family paying favourable contracts for advertisements, etc. It could certainly also be that Manchester City hired smarter commercial directors. We leave conclusions to the accountants among us.
 
 In terms of overall revenues, we see a similar pattern with Manchester City passing Liverpool's revenues in 2010/2011 and culminating in a difference of 503.51 Million pounds to 455.1 Million pounds by the 2018/2019 season.
